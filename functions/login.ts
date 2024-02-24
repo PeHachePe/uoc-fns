@@ -3,7 +3,22 @@ import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 
 export default async (req: Request, context: Context) => {
-  const { username, password } = await req.json();
+  let username: string, password: string;
+
+  try {
+    const body = await req.json();
+    username = body.username;
+    password = body.password;
+  } catch (error) {
+    return Response.json({ message: "Invalid request" }, { status: 400 });
+  }
+
+  if (!username || !password) {
+    return Response.json(
+      { message: "Username and password are required" },
+      { status: 400 }
+    );
+  }
 
   let browser;
   try {
@@ -32,11 +47,7 @@ export default async (req: Request, context: Context) => {
     const campusJWT = cookies.find((cookie) => cookie.name === "campusJWT");
 
     if (!campusJWT) {
-      console.error("Login failed or cookies not found");
-      return new Response(JSON.stringify({ message: "Login failed" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+      return Response.json({ message: "Login failed" }, { status: 401 });
     }
 
     const payload = Buffer.from(
@@ -49,16 +60,9 @@ export default async (req: Request, context: Context) => {
       campusJwt.sub = JSON.parse(campusJwt.sub);
     }
 
-    return new Response(JSON.stringify(campusJwt, null, 2), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json(campusJwt, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ message: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json({ message: "Internal server error" }, { status: 500 });
   } finally {
     if (browser) {
       await browser.close();
