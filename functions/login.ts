@@ -62,7 +62,8 @@ export default async (req: Request, context: Context) => {
 
     return Response.json(campusJwt, { status: 200 });
   } catch (error) {
-    return Response.json({ message: "Internal server error" }, { status: 500 });
+    console.error("Error:", error);
+    return Response.json({ message: "Internal server error " + error }, { status: 500 });
   } finally {
     if (browser) {
       await browser.close();
