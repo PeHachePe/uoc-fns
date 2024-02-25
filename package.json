@@ -12,5 +12,6 @@
     "@netlify/functions": "2.6.0",
     "@sparticuz/chromium": "122.0.0",
     "puppeteer-core": "22.2.0"
-  }
+  },
+  "type": "module"
 }
